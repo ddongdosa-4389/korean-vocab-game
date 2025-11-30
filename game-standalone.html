@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기본형 찾기 게임</title>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Jua', 'Nanum Gothic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            color: #333;
+            padding: 20px;
+        }
+
+        #root {
+            max-width: 1280px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3.2em;
+            line-height: 1.1;
+            color: #ff6b6b;
+            text-shadow: 2px 2px 0px #ffe66d;
+            margin-bottom: 20px;
+        }
+
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 시작 화면 스타일 */
+        .start-screen {
+            text-align: center;
+        }
+
+        .start-screen h2 {
+            color: #1a535c;
+            margin-bottom: 20px;
+        }
+
+        .start-screen p {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .question-count-selector {
+            margin: 30px 0;
+        }
+
+        .question-count-selector h3 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        .count-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .count-button {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            background-color: #4ecdc4;
+            color: white;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .count-button:hover {
+            background-color: #3db8af;
+            transform: scale(1.05);
+        }
+
+        .count-button.selected {
+            background-color: #ff6b6b;
+            border-color: #ff5252;
+            transform: scale(1.1);
+        }
+
+        .start-button {
+            padding: 20px 50px;
+            font-size: 1.5em;
+            background-color: #ff6b6b;
+            margin-top: 20px;
+        }
+
+        /* 게임 화면 스타일 */
+        .progress-bar {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .progress-text {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a3d5);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .score-board {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+
+        .question-card h2 {
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .word-display {
+            font-size: 4em;
+            font-weight: bold;
+            color: #1a535c;
+            margin: 40px 0;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            padding: 15px;
+            font-size: 1.5em;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            width: 60%;
+            min-width: 200px;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus {
+            border-color: #ff6b6b;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s;
+            font-family: inherit;
+        }
+
+        button:hover {
+            background-color: #ff5252;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .message {
+            font-size: 1.5em;
+            margin-top: 20px;
+            font-weight: bold;
+            min-height: 1.5em;
+        }
+
+        .message.correct {
+            color: #4ecdc4;
+        }
+
+        .message.incorrect {
+            color: #ff6b6b;
+        }
+
+        /* 결과 화면 스타일 */
+        .result-screen {
+            text-align: center;
+        }
+
+        .result-screen h2 {
+            color: #1a535c;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+
+        .result-stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .result-stats h3 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+
+        .restart-button {
+            padding: 20px 50px;
+            font-size: 1.5em;
+            background-color: #4ecdc4;
+            margin-top: 20px;
+        }
+
+        @keyframes popIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root">
+        <h1>🎮 기본형 찾기 게임 🎮</h1>
+        <div class="game-container">
+            <!-- 시작 화면 -->
+            <div id="start-screen" class="start-screen">
+                <h2>환영합니다! 👋</h2>
+                <p>
+                    활용형 단어를 보고 기본형을 맞추는 게임입니다.<br>
+                    준비되셨나요? 문제 수를 선택하고 시작하세요!
+                </p>
+                <div class="question-count-selector">
+                    <h3>몇 문제를 도전할까요?</h3>
+                    <div class="count-buttons">
+                        <button class="count-button" onclick="selectQuestionCount(5)">5문제</button>
+                        <button class="count-button selected" onclick="selectQuestionCount(10)">10문제</button>
+                        <button class="count-button" onclick="selectQuestionCount(15)">15문제</button>
+                        <button class="count-button" onclick="selectQuestionCount(20)">20문제</button>
+                    </div>
+                </div>
+                <button class="start-button" onclick="startGame()">🎮 게임 시작!</button>
+            </div>
+
+            <!-- 게임 화면 -->
+            <div id="game-screen" class="hidden">
+                <div class="progress-bar">
+                    <div class="progress-text">
+                        <span id="current-question">1</span> / <span id="total-questions">10</span> 문제
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="score-board">점수: <span id="score">0</span></div>
+                <div class="question-card">
+                    <h2>다음 단어의 기본형은 무엇일까요?</h2>
+                    <div class="word-display" id="word-display"></div>
+                    <div class="input-area">
+                        <input type="text" id="user-input" placeholder="기본형을 입력하세요" />
+                        <button onclick="checkAnswer()">확인</button>
+                    </div>
+                    <div class="message" id="message"></div>
+                </div>
+            </div>
+
+            <!-- 결과 화면 -->
+            <div id="result-screen" class="result-screen hidden">
+                <h2>🎉 게임 종료! 🎉</h2>
+                <div class="result-stats">
+                    <h3>최종 점수: <span id="final-score">0</span>점</h3>
+                    <div class="stat-item">정답: <span id="correct-count">0</span>개</div>
+                    <div class="stat-item">오답: <span id="incorrect-count">0</span>개</div>
+                    <div class="stat-item">정답률: <span id="accuracy">0</span>%</div>
+                </div>
+                <button class="restart-button" onclick="restartGame()">🔄 다시 하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 단어 데이터
+        const words = [
+            { conjugated: "높고", basic: "높다" },
+            { conjugated: "울면", basic: "울다" },
+            { conjugated: "예쁜", basic: "예쁘다" },
+            { conjugated: "먹어서", basic: "먹다" },
+            { conjugated: "가니", basic: "가다" },
+            { conjugated: "작은", basic: "작다" },
+            { conjugated: "웃으면", basic: "웃다" },
+            { conjugated: "달려서", basic: "달리다" },
+            { conjugated: "좋은", basic: "좋다" },
+            { conjugated: "싫어도", basic: "싫다" },
+            { conjugated: "빠르고", basic: "빠르다" },
+            { conjugated: "느려서", basic: "느리다" },
+            { conjugated: "입으면", basic: "입다" },
+            { conjugated: "벗고", basic: "벗다" },
+            { conjugated: "자니까", basic: "자다" }
+        ];
+
+        // 게임 상태
+        let currentWord = null;
+        let score = 0;
+        let selectedQuestionCount = 10;
+        let currentQuestionNumber = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+        let usedWords = [];
+
+        // DOM 요소
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const wordDisplay = document.getElementById('word-display');
+        const userInput = document.getElementById('user-input');
+        const scoreDisplay = document.getElementById('score');
+        const messageDisplay = document.getElementById('message');
+        const currentQuestionDisplay = document.getElementById('current-question');
+        const totalQuestionsDisplay = document.getElementById('total-questions');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+
+        // 사운드 생성 함수 (Web Audio API 사용)
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playCorrectSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 523.25; // C5
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+
+            // 두 번째 음 (화음)
+            const oscillator2 = audioContext.createOscillator();
+            const gainNode2 = audioContext.createGain();
+
+            oscillator2.connect(gainNode2);
+            gainNode2.connect(audioContext.destination);
+
+            oscillator2.frequency.value = 659.25; // E5
+            oscillator2.type = 'sine';
+
+            gainNode2.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator2.start(audioContext.currentTime + 0.1);
+            oscillator2.stop(audioContext.currentTime + 0.6);
+        }
+
+        function playIncorrectSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = 200; // 낮은 음
+            oscillator.type = 'sawtooth';
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+
+            // 두 번째 삐 소리
+            const oscillator2 = audioContext.createOscillator();
+            const gainNode2 = audioContext.createGain();
+
+            oscillator2.connect(gainNode2);
+            gainNode2.connect(audioContext.destination);
+
+            oscillator2.frequency.value = 180;
+            oscillator2.type = 'sawtooth';
+
+            gainNode2.gain.setValueAtTime(0.3, audioContext.currentTime + 0.15);
+            gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.45);
+
+            oscillator2.start(audioContext.currentTime + 0.15);
+            oscillator2.stop(audioContext.currentTime + 0.45);
+        }
+
+        // 문제 수 선택
+        function selectQuestionCount(count) {
+            selectedQuestionCount = count;
+            document.querySelectorAll('.count-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        // 게임 시작
+        function startGame() {
+            score = 0;
+            currentQuestionNumber = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+            usedWords = [];
+
+            startScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            resultScreen.classList.add('hidden');
+
+            totalQuestionsDisplay.textContent = selectedQuestionCount;
+            scoreDisplay.textContent = score;
+
+            nextQuestion();
+        }
+
+        // 다음 문제
+        function nextQuestion() {
+            if (currentQuestionNumber >= selectedQuestionCount) {
+                showResults();
+                return;
+            }
+
+            currentQuestionNumber++;
+            currentQuestionDisplay.textContent = currentQuestionNumber;
+
+            // 진행률 업데이트
+            const progress = (currentQuestionNumber / selectedQuestionCount) * 100;
+            progressBarFill.style.width = progress + '%';
+
+            // 사용하지 않은 단어 중에서 랜덤 선택
+            let availableWords = words.filter(w => !usedWords.includes(w));
+            if (availableWords.length === 0) {
+                usedWords = [];
+                availableWords = words;
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableWords.length);
+            currentWord = availableWords[randomIndex];
+            usedWords.push(currentWord);
+
+            wordDisplay.textContent = currentWord.conjugated;
+            userInput.value = '';
+            messageDisplay.textContent = '';
+            messageDisplay.className = 'message';
+            userInput.focus();
+        }
+
+        // 정답 확인
+        function checkAnswer() {
+            if (!currentWord) return;
+
+            const answer = userInput.value.trim();
+
+            if (answer === currentWord.basic) {
+                score += 10;
+                correctAnswers++;
+                scoreDisplay.textContent = score;
+                messageDisplay.textContent = '정답입니다! 참 잘했어요!';
+                messageDisplay.className = 'message correct';
+                playCorrectSound();
+                setTimeout(nextQuestion, 1500);
+            } else {
+                incorrectAnswers++;
+                messageDisplay.textContent = `틀렸어요. 정답은 "${currentWord.basic}" 입니다.`;
+                messageDisplay.className = 'message incorrect';
+                playIncorrectSound();
+            }
+        }
+
+        // 결과 화면 표시
+        function showResults() {
+            gameScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+
+            const accuracy = Math.round((correctAnswers / selectedQuestionCount) * 100);
+
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('correct-count').textContent = correctAnswers;
+            document.getElementById('incorrect-count').textContent = incorrectAnswers;
+            document.getElementById('accuracy').textContent = accuracy;
+        }
+
+        // 게임 재시작
+        function restartGame() {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        }
+
+        // Enter 키 지원
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !gameScreen.classList.contains('hidden')) {
+                checkAnswer();
+            }
+        });
+    </script>
+</body>
+
+</html>
